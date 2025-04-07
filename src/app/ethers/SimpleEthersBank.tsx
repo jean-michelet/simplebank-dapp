@@ -18,6 +18,7 @@ const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_BANK_ETHER_CONTRACT_ADDRESS!;
 export default function SimpleEthersBank() {
   const { account, contract, connectWallet } = useConnectWallet();
   const [balance, setBalance] = useState("0");
+  const [bankBalance, setBankBalance] = useState("0");
   const [amount, setAmount] = useState("");
 
   const isInvalidAmount = !amount || Number(amount) <= 0;
@@ -29,8 +30,12 @@ export default function SimpleEthersBank() {
       try {
         const userBalanceWei = await bank.getBalance();
         const userBalanceEth = ethers.formatEther(userBalanceWei);
-
         setBalance(userBalanceEth);
+
+        const bankBalanceWei = await bank.contractBalance();
+        const bankBalanceEth = ethers.formatEther(bankBalanceWei);
+        setBankBalance(bankBalanceEth)
+
       } catch (error) {
         toast.error(parseError(error, "Balance retrieval failed"));
       }
@@ -49,6 +54,10 @@ export default function SimpleEthersBank() {
       const updatedWei = await contract.getBalance();
       const updatedEth = ethers.formatEther(updatedWei);
       setBalance(updatedEth);
+
+      const updatedBankWei = await contract.getBalance();
+      const updatedBankEth = ethers.formatEther(updatedBankWei);
+      setBankBalance(updatedBankEth)
 
       setAmount("");
       toast.dismiss();
@@ -95,6 +104,9 @@ export default function SimpleEthersBank() {
     <>
       <div className="space-y-6">
         <div className="text-sm">
+        <p className="mt-2 text-gray-700">
+            <strong>Total Bank balance:</strong> {bankBalance} ETH
+          </p>
           <p className="text-gray-700">
             <strong>Account:</strong>
             <br />
@@ -108,10 +120,9 @@ export default function SimpleEthersBank() {
         <div className="flex gap-2">
           <input
             type="number"
-            step="0.0001"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="Amount in ETH"
+            placeholder="Amount in ETH (0.0001 <= amount <= 0.001)"
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
         </div>
