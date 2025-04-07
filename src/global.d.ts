@@ -1,5 +1,7 @@
+import { ethers } from "ethers";
+
 declare global {
   interface Window {
-    ethereum?: unknown;
+    ethereum?: ethers.Eip1193Provider;
   }
 }
